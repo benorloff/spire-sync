@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "target": "es5",                         // Output ES5 compatible code.
+      "module": "ESNext",                      // Use ESNext module resolution.
+      "jsx": "react",                          // Enable JSX syntax (for TSX files).
+      "strict": true,                          // Enable strict type checking.
+      "esModuleInterop": true,                 // Allow default imports from commonjs modules.
+      "skipLibCheck": true,                    // Skip type checking of declaration files.
+      "forceConsistentCasingInFileNames": true, 
+      "moduleResolution": "node",              // Use Node module resolution.
+      "allowSyntheticDefaultImports": true,
+      "isolatedModules": true,
+      "noEmit": true                           // @wordpress/scripts to handle output.
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules",
+      "assets"
+    ]
+  }

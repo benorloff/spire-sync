@@ -1,16 +1,34 @@
 {
     "name": "spire-sync",
     "version": "1.0.0",
+    "description": "A WordPress plugin to sync WooCommerce data with the Spire API using React & TypeScript.",
+    "main": "spire-sync.php",
     "scripts": {
-      "build": "wp-scripts build",
-      "start": "wp-scripts start"
+        "build:dashboard": "wp-scripts build src/admin/dashboard/index.tsx --output-path=assets/js --output-filename=dashboard.build.js",
+        "build:manage-syncs": "wp-scripts build src/admin/manage-syncs/index.tsx --output-path=assets/js --output-filename=manage-syncs.build.js",
+        "build:settings": "wp-scripts build src/admin/settings/index.tsx --output-path=assets/js --output-filename=settings.build.js",
+        "build:logs": "wp-scripts build src/admin/logs/index.tsx --output-path=assets/js --output-filename=logs.build.js",
+        "build": "npm run build:dashboard && npm run build:manage-syncs && npm run build:settings && npm run build:logs",
+        "start:dashboard": "wp-scripts start src/admin/dashboard/index.tsx --output-path=assets/js --output-filename=dashboard.build.js",
+        "start:manage-syncs": "wp-scripts start src/admin/manage-syncs/index.tsx --output-path=assets/js --output-filename=manage-syncs.build.js",
+        "start:settings": "wp-scripts start src/admin/settings/index.tsx --output-path=assets/js --output-filename=settings.build.js",
+        "start:logs": "wp-scripts start src/admin/logs/index.tsx --output-path=assets/js --output-filename=logs.build.js",
+        "start": "npm run start:dashboard"
     },
+    "author": "Ben Orloff",
+    "license": "GPL-2.0-or-later",
     "dependencies": {
-      "@wordpress/components": "latest",
-      "react": "latest",
-      "react-dom": "latest"
+        "@wordpress/components": "latest",
+        "react": "latest",
+        "react-dom": "latest"
     },
     "devDependencies": {
-      "@wordpress/scripts": "latest"
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.2",
+        "@types/react-router": "^5.1.20",
+        "@types/react-router-dom": "^5.3.3",
+        "@wordpress/scripts": "latest",
+        "ajv": "^8.17.1",
+        "typescript": "^5.8.3"
     }
-  }
+}

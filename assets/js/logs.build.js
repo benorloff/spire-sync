@@ -1,0 +1,1 @@
+(()=>{"use strict";window.React;const e=window.wp.element,n=window.wp.i18n,t=window.ReactJSXRuntime,d=()=>(0,t.jsx)("div",{children:(0,t.jsx)("h1",{children:(0,n.__)("Manage Syncs","spire-sync")})});document.addEventListener("DOMContentLoaded",(()=>{const n=document.getElementById("spire-sync-logs-root");n&&(0,e.createRoot)(n).render((0,t.jsx)(d,{}))}))})();
