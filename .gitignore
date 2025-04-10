@@ -1,0 +1,8 @@
+# Node modules and build files
+node_modules/
+assets/js/admin.build.js
+assets/js/admin.build.asset.php
+package-lock.json
+
+# Composer vendor directory
+vendor/

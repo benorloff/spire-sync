@@ -1,0 +1,16 @@
+{
+    "name": "spire-sync",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "wp-scripts build",
+      "start": "wp-scripts start"
+    },
+    "dependencies": {
+      "@wordpress/components": "latest",
+      "react": "latest",
+      "react-dom": "latest"
+    },
+    "devDependencies": {
+      "@wordpress/scripts": "latest"
+    }
+  }
