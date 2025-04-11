@@ -1,10 +1,6 @@
 <?php
 namespace SpireSync\Admin;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
 class Spire_Sync_Spire_API_Client {
 
     protected $base_url = 'http://4.227.95.248:10880/api/v2';
@@ -40,6 +36,17 @@ class Spire_Sync_Spire_API_Client {
             return $response;
         }
         return json_decode( wp_remote_retrieve_body( $response ), true );
+    }
+
+    public function test_connection() {
+        $response = wp_remote_request( $this->base_url );
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+        $status_code = wp_remote_retrieve_response_code( $response );
+        return ( $status_code === 200 ) 
+            ? true 
+            : new \WP_Error( 'spire_sync_connection_error', __( 'Connection failed.', 'spire-sync' ) );
     }
 
     /**

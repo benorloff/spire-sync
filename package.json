@@ -4,20 +4,13 @@
     "description": "A WordPress plugin to sync WooCommerce data with the Spire API using React & TypeScript.",
     "main": "spire-sync.php",
     "scripts": {
-        "build:dashboard": "wp-scripts build src/admin/dashboard/index.tsx --output-path=assets/js --output-filename=dashboard.build.js",
-        "build:manage-syncs": "wp-scripts build src/admin/manage-syncs/index.tsx --output-path=assets/js --output-filename=manage-syncs.build.js",
-        "build:settings": "wp-scripts build src/admin/settings/index.tsx --output-path=assets/js --output-filename=settings.build.js",
-        "build:logs": "wp-scripts build src/admin/logs/index.tsx --output-path=assets/js --output-filename=logs.build.js",
-        "build": "npm run build:dashboard && npm run build:manage-syncs && npm run build:settings && npm run build:logs",
-        "start:dashboard": "wp-scripts start src/admin/dashboard/index.tsx --output-path=assets/js --output-filename=dashboard.build.js",
-        "start:manage-syncs": "wp-scripts start src/admin/manage-syncs/index.tsx --output-path=assets/js --output-filename=manage-syncs.build.js",
-        "start:settings": "wp-scripts start src/admin/settings/index.tsx --output-path=assets/js --output-filename=settings.build.js",
-        "start:logs": "wp-scripts start src/admin/logs/index.tsx --output-path=assets/js --output-filename=logs.build.js",
-        "start": "npm run start:dashboard"
+        "build": "wp-scripts build --config webpack.config.js",
+        "start": "wp-scripts start --config webpack.config.js"
     },
     "author": "Ben Orloff",
     "license": "GPL-2.0-or-later",
     "dependencies": {
+        "@wordpress/api-fetch": "^7.22.0",
         "@wordpress/components": "latest",
         "react": "latest",
         "react-dom": "latest"

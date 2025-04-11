@@ -1,10 +1,6 @@
 <?php
 namespace SpireSync\Admin;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
 class Spire_Sync_Manage_Syncs {
 
     public function __construct() {
@@ -30,7 +26,7 @@ class Spire_Sync_Manage_Syncs {
     public function enqueue_assets() {
         wp_enqueue_script(
             'spire-sync-manage-syncs',
-            plugin_dir_url( __FILE__ ) . '../../assets/js/manage-syncs.build.js',
+            plugin_dir_url( __FILE__ ) . '../../build/manage-syncs.build.js',
             [ 'jquery' ],
             '1.0.0',
             true

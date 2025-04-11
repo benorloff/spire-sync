@@ -1,0 +1,10 @@
+
+/* Additional spacing for panels (built with @wordpress/components) */
+.spire-sync-settings-container .components-panel {
+    margin-bottom: 20px;
+}
+
+/* Styling for the notice (if using a custom Notice component) */
+.spire-sync-settings-container .components-notice {
+    margin-bottom: 20px;
+}

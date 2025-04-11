@@ -3,10 +3,6 @@ namespace SpireSync\Admin;
 
 use \Automattic\WooCommerce\Utilities\LoggingUtil;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
 class Spire_Sync_Logs {
 
     public function __construct() {

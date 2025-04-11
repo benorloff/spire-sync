@@ -1,10 +1,6 @@
 <?php
 namespace SpireSync\Admin;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
 class Spire_Sync_WooCommerce {
 
     /**
