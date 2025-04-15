@@ -35,11 +35,48 @@ function spire_sync_init() {
 }
 add_action( 'plugins_loaded', 'spire_sync_init' );
 
+function spire_sync_register_settings() {
+    $default_settings = [
+        'base_url'     => '',
+        'api_username' => '',
+        'api_password' => '',
+    ];
+    $schema = [
+        'type'       => 'object',
+        'properties' => [
+            'base_url' => [
+                'type'        => 'string',
+                'description' => __( 'Base URL for Spire API', 'spire-sync' ),
+            ],
+            'api_username' => [
+                'type'        => 'string',
+                'description' => __( 'API Username', 'spire-sync' ),
+            ],
+            'api_password' => [
+                'type'        => 'string',
+                'description' => __( 'API Password', 'spire-sync' ),
+            ],
+        ],
+    ];
+    
+    register_setting(
+        'options',
+        'spire_sync',
+        [
+            'type'         => 'object',
+            'default'      => $default_settings,
+            'show_in_rest' => [
+                'schema' => $schema,
+            ],
+        ]
+    );
+}
+add_action( 'init', 'spire_sync_register_settings' );
+
 /**
  * Enqueue admin scripts and styles.
  */
 function spire_sync_enqueue_global_admin_styles() {
-    // This enqueues the built-in wp-components styles on all admin pages.
     wp_enqueue_style( 'wp-components' );
 }
 add_action( 'admin_enqueue_scripts', 'spire_sync_enqueue_global_admin_styles' );

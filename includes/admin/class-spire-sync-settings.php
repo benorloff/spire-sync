@@ -10,6 +10,7 @@ class Spire_Sync_Settings {
     public function __construct() {
         add_action('admin_menu', [$this, 'register_settings_page']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+        // add_action('init', [ $this, 'spire_sync_settings' ]);
     }
 
     /**
@@ -34,15 +35,15 @@ class Spire_Sync_Settings {
         wp_enqueue_script(
             'spire-sync-settings',
             plugin_dir_url(__FILE__) . '../../build/settings.build.js',
-            ['wp-element', 'wp-components', 'wp-i18n'],
+            ['wp-element', 'wp-components', 'wp-i18n', 'wp-data', 'wp-api-fetch'],
             '1.0.0',
             true
         );
 
-        wp_localize_script('spire-sync-settings', 'spireSyncSettings', [
-            'nonce'    => wp_create_nonce('wp_rest'),
-            'settings' => get_option('spire_sync_admin_options', []),
-        ]);
+        // wp_localize_script('spire-sync-settings', 'spireSyncSettings', [
+        //     'nonce'    => wp_create_nonce('wp_rest'),
+        //     'settings' => get_option('spire_sync_admin_options', []),
+        // ]);
 
         wp_enqueue_style(
             'spire-sync-settings-style',

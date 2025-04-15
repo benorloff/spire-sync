@@ -12,6 +12,7 @@
     "dependencies": {
         "@wordpress/api-fetch": "^7.22.0",
         "@wordpress/components": "latest",
+        "@wordpress/notices": "^5.22.0",
         "react": "latest",
         "react-dom": "latest"
     },
