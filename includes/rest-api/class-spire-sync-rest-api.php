@@ -25,7 +25,7 @@ class Spire_Sync_Rest_API {
 	 */
 	public function __construct() {
 		// Load settings once on instantiation.
-		$this->settings = get_option('spire_sync', []);
+		$this->settings = get_option('spire_sync_settings', []);
 		add_action('rest_api_init', [$this, 'register_routes']);
 	}
 
@@ -39,7 +39,7 @@ class Spire_Sync_Rest_API {
 			'permission_callback' => [$this, 'permissions_check'],
 		]);
 		register_rest_route('spire_sync/v1', '/test-connection', [
-			'methods'             => 'GET',
+			'methods'             => 'POST',
 			'callback'            => [$this, 'test_connection'],
 			'permission_callback' => [$this, 'permissions_check'],
 		]);
@@ -79,7 +79,7 @@ class Spire_Sync_Rest_API {
 			$new_settings['api_password'] = Spire_Sync_Encryption::encrypt($new_settings['api_password'], $encryption_key);
 		}
 
-		update_option('spire_sync', $new_settings);
+		update_option('spire_sync_settings', $new_settings);
 
 		// Refresh our local cached settings.
 		$this->settings = $new_settings;
@@ -91,24 +91,18 @@ class Spire_Sync_Rest_API {
 	}
 
 	/**
-	 * Tests the connection to the Spire API using stored credentials.
+	 * Tests the connection to the Spire API.
 	 *
 	 * @param \WP_REST_Request $request
 	 * @return \WP_REST_Response
 	 */
 	public function test_connection(\WP_REST_Request $request) {
-		// Use the cached settings.
-		$base_url = isset($this->settings['base_url']) ? esc_url_raw($this->settings['base_url']) : '';
-		$api_username = isset($this->settings['api_username']) ? sanitize_text_field($this->settings['api_username']) : '';
-		$encrypted_password = isset($this->settings['api_password']) ? $this->settings['api_password'] : '';
+		// 1. Retrieve credentials from the request.
+		$base_url     = $request->get_param('base_url') ? esc_url_raw($request->get_param('base_url')) : '';
+		$api_username = $request->get_param('api_username') ? sanitize_text_field($request->get_param('api_username')) : '';
+		$api_password = $request->get_param('api_password') ? sanitize_text_field($request->get_param('api_password')) : '';
 
-		$api_password = '';
-		// Decrypt the password.
-		if (! empty($encrypted_password)) {
-			$encryption_key = defined('SPIRE_SYNC_ENCRYPTION_KEY') ? SPIRE_SYNC_ENCRYPTION_KEY : '';
-			$api_password = $encryption_key ? Spire_Sync_Encryption::decrypt($encrypted_password, $encryption_key) : '';
-		}
-
+		// 2. Validate inputs.
 		if (empty($base_url) || empty($api_username) || empty($api_password)) {
 			return rest_ensure_response([
 				'success' => false,
@@ -116,25 +110,33 @@ class Spire_Sync_Rest_API {
 			]);
 		}
 
-		// Instantiate your Spire API client.
-		$client = new Spire_Sync_Spire_API_Client();
+		// 3. Instantiate your Spire API client using the provided credentials.
+		//    Here we assume your client class can accept URL, username, and password,
+		//    either via constructor or setter methods.
+		$client = new Spire_Sync_Spire_API_Client([
+			'base_url'  => $base_url,
+			'username'  => $api_username,
+			'password'  => $api_password,
+		]);
 
-		// Send a GET request to the Spire API base url to test the connection.
+		// 4. Perform a simple GET request to verify connectivity.
 		$response = $client->request('GET', '');
 
+		// 5. Check for errors.
 		if (is_wp_error($response)) {
 			return rest_ensure_response([
 				'success' => false,
-				'message' => sprintf(__('Connection test failed: %s', 'spire-sync'), $response->get_error_message()),
+				'message' => sprintf(
+					__('Connection test failed: %s', 'spire-sync'),
+					$response->get_error_message()
+				),
 			]);
 		}
 
+		// 6. Success!
 		return rest_ensure_response([
 			'success' => true,
 			'message' => __('Connection successful.', 'spire-sync'),
 		]);
 	}
 }
-
-// Initialize the REST API functionality.
-new Spire_Sync_Rest_API();

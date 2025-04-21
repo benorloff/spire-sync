@@ -5,10 +5,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 
 interface SpireSyncSettings {
-    spire_sync: {
-        base_url: string;
-        api_username: string;
-        api_password: string;
+    spire_sync_settings: {
+        spire_api: {
+            base_url: string;
+            company_name: string;
+            api_username: string;
+            api_password: string;
+        };
     };
 }
 
@@ -19,10 +22,12 @@ interface SpireSyncTestConnectionResponse {
 
 const useSettings = () => {
     const [ baseUrl, setBaseUrl ] = useState<string>('');
+    const [ companyName, setCompanyName ] = useState<string>('');
     const [ apiUsername, setApiUsername ] = useState<string>('');
     const [ apiPassword, setApiPassword ] = useState<string>('');
+    const [ isTesting, setIsTesting ] = useState<boolean>( false );
     const [ isSaving, setIsSaving ] = useState<boolean>( false );
-    const [ isApiConnected, setIsApiConnected ] = useState<boolean>( false );
+    const [ isValidConnection, setIsValidConnection ] = useState<boolean>( false );
     const [ message, setMessage ] = useState<string>( '' );
 
 	// const { createSuccessNotice } = useDispatch( noticesStore );
@@ -30,30 +35,36 @@ const useSettings = () => {
 	useEffect( () => {
 		apiFetch( { path: '/wp/v2/settings' } ).then( ( response ) => {
 			const settings = response as SpireSyncSettings;
-			setBaseUrl( settings.spire_sync.base_url || '' );
-			setApiUsername( settings.spire_sync.api_username || '' );
-			setApiPassword( settings.spire_sync.api_password || '' );
+			setBaseUrl( settings.spire_sync_settings.spire_api.base_url || '' );
+            setCompanyName( settings.spire_sync_settings.spire_api.company_name || '' );
+			setApiUsername( settings.spire_sync_settings.spire_api.api_username || '' );
+			setApiPassword( settings.spire_sync_settings.spire_api.api_password || '' );
 		} );
 	}, [] );
 
     const handleSave = async () => {
         setIsSaving( true );
         setMessage( '' );
-        const testConnection = await handleTestConnection();
+        // const testConnection = await handleTestConnection();
         
     }
 
     const handleTestConnection = async () => {
+
+        setIsTesting( true );
+        setMessage( '' );
+
         let testConnectionResponse = {
             success: false,
             message: '',
         };
 
         apiFetch( {
-            path: '/spire/v1/test-connection',
+            path: '/spire_sync/v1/test-connection',
             method: 'POST',
             data: {
                 base_url: baseUrl,
+                company_name: companyName,
                 api_username: apiUsername,
                 api_password: apiPassword,
             },
@@ -61,14 +72,18 @@ const useSettings = () => {
             testConnectionResponse = response as SpireSyncTestConnectionResponse;
             
             if ( ! testConnectionResponse.success ) {
-                setIsApiConnected( false );
+                setIsTesting( false );
+                setIsValidConnection( false );
+                setMessage( __( 'Invalid credentials. Please try again.', 'spire-sync' ) );
             } 
             
-            setIsApiConnected( true );
-            saveSettings();
+            setIsTesting( false );
+            setIsValidConnection( true );
+            setMessage( __( 'Connection successful!', 'spire-sync' ) );
         } ).catch( ( error ) => {
-            setIsApiConnected( false );
-            setMessage( __( 'Connection failed.', 'spire-sync' ) );
+            setIsTesting( false );
+            setIsValidConnection( false );
+            setMessage( __( 'An error occurred while testing the connection. Please try again later.', 'spire-sync' ) );
             console.error( error );
         } );
     }
@@ -81,13 +96,17 @@ const useSettings = () => {
 			path: '/wp/v2/settings',
 			method: 'POST',
 			data: {
-                spire_sync: {
-                    'base_url': baseUrl,
-                    'api_username': apiUsername,
-                    'api_password': apiPassword,
+                spire_sync_settings: {
+                    spire_api: {
+                        'base_url': baseUrl,
+                        'company_name': companyName,
+                        'api_username': apiUsername,
+                        'api_password': apiPassword,
+                    },
                 },
 			},
-		} ).then( () => {
+		} ).then( (response) => {
+            console.log( 'Settings saved:', response );
             setMessage( __( 'Settings saved successfully.', 'spire-sync' ) );
             setIsSaving( false );
 			// createSuccessNotice(
@@ -103,15 +122,23 @@ const useSettings = () => {
 	return {
 		baseUrl,
         setBaseUrl,
+        companyName,
+        setCompanyName,
         apiUsername,
         setApiUsername,
         apiPassword,
         setApiPassword,
+        isTesting,
+        setIsTesting,
         isSaving,
         setIsSaving,
+        isValidConnection,
+        setIsValidConnection,
         message,
         setMessage,
-		saveSettings,
+        handleTestConnection,
+		handleSave,
+        saveSettings,
 	};
 };
 

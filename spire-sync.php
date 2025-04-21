@@ -15,12 +15,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-dash
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-manage-syncs.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-logs.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-spire-api-client.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/rest-api/class-spire-sync-rest-api.php';
 
 use SpireSync\Admin\Spire_Sync_Dashboard;
 use SpireSync\Admin\Spire_Sync_Manage_Syncs;
 use SpireSync\Admin\Spire_Sync_Settings;
 use SpireSync\Admin\Spire_Sync_Logs;
+use SpireSync\Admin\Spire_Sync_Spire_API_Client;
 use SpireSync\RestApi\Spire_Sync_Rest_API;
 
 /**
@@ -31,37 +33,51 @@ function spire_sync_init() {
     new Spire_Sync_Manage_Syncs();
     new Spire_Sync_Settings();
     new Spire_Sync_Logs();
+    new Spire_Sync_Spire_API_Client();
     new Spire_Sync_Rest_API();
 }
 add_action( 'plugins_loaded', 'spire_sync_init' );
 
 function spire_sync_register_settings() {
     $default_settings = [
-        'base_url'     => '',
-        'api_username' => '',
-        'api_password' => '',
+        'spire_api' => [
+            'base_url'     => '',
+            'api_username' => '',
+            'api_password' => '',
+            'company_name' => '',
+        ],
     ];
+
     $schema = [
         'type'       => 'object',
         'properties' => [
-            'base_url' => [
-                'type'        => 'string',
-                'description' => __( 'Base URL for Spire API', 'spire-sync' ),
-            ],
-            'api_username' => [
-                'type'        => 'string',
-                'description' => __( 'API Username', 'spire-sync' ),
-            ],
-            'api_password' => [
-                'type'        => 'string',
-                'description' => __( 'API Password', 'spire-sync' ),
+            'spire_api' => [
+                'type'       => 'object',
+                'properties' => [
+                    'base_url' => [
+                        'type'        => 'string',
+                        'description' => __( 'Base URL for Spire API', 'spire-sync' ),
+                    ],
+                    'api_username' => [
+                        'type'        => 'string',
+                        'description' => __( 'API Username', 'spire-sync' ),
+                    ],
+                    'api_password' => [
+                        'type'        => 'string',
+                        'description' => __( 'API Password', 'spire-sync' ),
+                    ],
+                    'company_name' => [
+                        'type'        => 'string',
+                        'description' => __( 'Spire Company Name', 'spire-sync' ),
+                    ],
+                ],
             ],
         ],
     ];
     
     register_setting(
         'options',
-        'spire_sync',
+        'spire_sync_settings',
         [
             'type'         => 'object',
             'default'      => $default_settings,
