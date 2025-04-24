@@ -10,10 +10,10 @@ class Spire_Sync_Spire_API_Client {
 
     public function __construct() {
         $options = get_option( 'spire_sync_settings', [] );
-        $this->base_url = isset( $options['base_url'] ) ? rtrim( $options['base_url'], '/' ) : '';
-        $this->company_name = isset( $options['company_name'] ) ? $options['company_name'] : '';
-        $this->username = isset( $options['api_username'] ) ? $options['api_username'] : '';
-        $this->password = isset( $options['api_password'] ) ? $options['api_password'] : '';
+        $this->base_url = isset( $options['spire_api']['base_url'] ) ? rtrim( $options['spire_api']['base_url'], '/' ) : '';
+        $this->company_name = isset( $options['spire_api']['company_name'] ) ? $options['spire_api']['company_name'] : '';
+        $this->username = isset( $options['spire_api']['api_username'] ) ? $options['spire_api']['api_username'] : '';
+        $this->password = isset( $options['spire_api']['api_password'] ) ? $options['spire_api']['api_password'] : '';
     }
 
     /**
@@ -39,6 +39,15 @@ class Spire_Sync_Spire_API_Client {
             return $response;
         }
         return json_decode( wp_remote_retrieve_body( $response ), true );
+    }
+
+    /**
+     * Fetches companies from the Spire instance.
+     * 
+     * @return array|WP_Error
+     */
+    public function get_companies() {
+        return $this->request( 'GET', 'companies' );
     }
 
     /**

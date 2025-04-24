@@ -29,6 +29,8 @@ const useSettings = () => {
     const [ isSaving, setIsSaving ] = useState<boolean>( false );
     const [ isValidConnection, setIsValidConnection ] = useState<boolean>( false );
     const [ message, setMessage ] = useState<string>( '' );
+    const [ wcVersion, setWcVersion ] = useState<string>( '' );
+    const [ syncType, setSyncType ] = useState<"create"|"update"|"create-update"|"create-update-delete">( 'update' );
 
 	// const { createSuccessNotice } = useDispatch( noticesStore );
 
@@ -40,6 +42,11 @@ const useSettings = () => {
 			setApiUsername( settings.spire_sync_settings.spire_api.api_username || '' );
 			setApiPassword( settings.spire_sync_settings.spire_api.api_password || '' );
 		} );
+        apiFetch( { path: '/wc/v3/system_status' } ).then( ( response ) => {
+            const system_status = response as any;
+            const wcVers = system_status.environment.version ?? '';
+            setWcVersion( wcVers );
+        })
 	}, [] );
 
     const handleSave = async () => {
@@ -139,6 +146,9 @@ const useSettings = () => {
         handleTestConnection,
 		handleSave,
         saveSettings,
+        wcVersion,
+        syncType,
+        setSyncType,
 	};
 };
 

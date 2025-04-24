@@ -7,8 +7,10 @@ import {
   TextControl,
   Button,
   Notice,
+  NavigableMenu,
   __experimentalInputControl as InputControl,
   __experimentalInputControlSuffixWrapper as InputControlSuffixWrapper,
+  SelectControl,
 } from "@wordpress/components";
 import { more } from "@wordpress/icons";
 import useSettings from "../../hooks/useSettings";
@@ -32,6 +34,9 @@ const SettingsPage: React.FC = () => {
     handleSave,
     handleTestConnection,
     saveSettings,
+    wcVersion,
+    syncType,
+    setSyncType,
   } = useSettings();
 
   return (
@@ -46,6 +51,12 @@ const SettingsPage: React.FC = () => {
           {message}
         </Notice>
       )}
+
+      {/* <NavigableMenu orientation={"vertical"}>
+        <Button variant="tertiary">Item 1</Button>
+        <Button variant="secondary">Item 2</Button>
+        <Button variant="secondary">Item 3</Button>
+      </NavigableMenu> */}
       <Panel header="Settings">
         <React.Fragment key="0">
           <PanelBody
@@ -100,6 +111,22 @@ const SettingsPage: React.FC = () => {
               />
             </PanelRow>
             <PanelRow>
+              <SelectControl
+                __next40pxDefaultSize
+                __nextHasNoMarginBottom
+                label={__("Sync Type", "spire-sync")}
+                value={syncType}
+                options={[
+                  { label: __("Create Only", "spire-sync"), value: "create" },
+                  { label: __("Update Only", "spire-sync"), value: "update" },
+                  { label: __("Create & Update", "spire-sync"), value: "create-update" },
+                  { label: __("Create, Update, & Delete", "spire-sync"), value: "create-update-delete" },
+                ]}
+                onChange={setSyncType}
+                style={{ width: "400px" }}
+              />
+            </PanelRow>
+            <PanelRow>
               <Button
                 variant="secondary"
                 onClick={handleTestConnection}
@@ -113,6 +140,10 @@ const SettingsPage: React.FC = () => {
           </PanelBody>
         </React.Fragment>
       </Panel>
+      {/* <div>
+        <h1>Status</h1>
+        <p>Version: {wcVersion}</p>
+      </div> */}
       <Button variant="primary" onClick={saveSettings} disabled={isSaving}>
         {isSaving
           ? __("Saving...", "spire-sync")
