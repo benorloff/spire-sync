@@ -3,6 +3,11 @@ namespace SpireSync\Admin;
 
 class Spire_Sync_WooCommerce {
 
+    public function get_woocommerce_status() {
+        $is_woocommerce_active = in_array( 'woocommerce', wp_get_active_and_valid_plugins() );
+        return $is_woocommerce_active;
+    }
+
     /**
      * Inserts or updates WooCommerce products based on Spire API response records.
      *

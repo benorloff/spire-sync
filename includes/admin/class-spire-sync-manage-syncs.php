@@ -27,7 +27,7 @@ class Spire_Sync_Manage_Syncs {
         wp_enqueue_script(
             'spire-sync-manage-syncs',
             plugin_dir_url( __FILE__ ) . '../../build/manage-syncs.build.js',
-            [ 'jquery' ],
+            [ 'wp-element', 'wp-components', 'wp-i18n', 'wp-data', 'wp-api-fetch', 'jquery' ],
             '1.0.0',
             true
         );
@@ -44,34 +44,10 @@ class Spire_Sync_Manage_Syncs {
      * Renders the Manage Syncs page.
      */
     public function render_manage_syncs_page() {
-        // For now, prepopulate one sync option: Sync Inventory By Brand.
-        // Example: Get brands from product_brand taxonomy.
-        $brands = get_terms( [
-            'taxonomy'   => 'product_brand',
-            'hide_empty' => false,
-        ]);
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'Manage Syncs', 'spire-sync' ); ?></h1>
-            <p><?php esc_html_e( 'Select a brand and click "Start Sync" to trigger an inventory sync.', 'spire-sync' ); ?></p>
-            <div id="sync-option">
-                <h2><?php esc_html_e( 'Sync Inventory By Brand', 'spire-sync' ); ?></h2>
-                <label for="sync_brand"><?php esc_html_e( 'Select Brand:', 'spire-sync' ); ?></label>
-                <select id="sync_brand">
-                    <option value=""><?php esc_html_e( '-- Select Brand --', 'spire-sync' ); ?></option>
-                    <?php
-                    if ( ! empty( $brands ) && ! is_wp_error( $brands ) ) {
-                        foreach ( $brands as $brand ) {
-                            echo '<option value="' . esc_attr( $brand->name ) . '">' . esc_html( $brand->name ) . '</option>';
-                        }
-                    }
-                    ?>
-                </select>
-                <button id="start-sync" class="button button-primary"><?php esc_html_e( 'Start Sync', 'spire-sync' ); ?></button>
-            </div>
-            <div id="sync-progress" style="display:none; margin-top:20px;">
-                <div id="sync-status"></div>
-                <div id="sync-progress-bar" style="background:#0073aa; height:20px; width:0%;"></div>
+            <div id="spire-sync-manage-syncs-root">
+                <!-- React ManageSyncs component will mount here -->
             </div>
         </div>
         <?php

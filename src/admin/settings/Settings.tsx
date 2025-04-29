@@ -11,6 +11,12 @@ import {
   __experimentalInputControl as InputControl,
   __experimentalInputControlSuffixWrapper as InputControlSuffixWrapper,
   SelectControl,
+  ToggleControl,
+  FormToggle,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
 } from "@wordpress/components";
 import { more } from "@wordpress/icons";
 import useSettings from "../../hooks/useSettings";
@@ -25,18 +31,22 @@ const SettingsPage: React.FC = () => {
     setApiUsername,
     apiPassword,
     setApiPassword,
-    isTesting,
-    setIsTesting,
-    isSaving,
-    setIsSaving,
-    message,
-    setMessage,
-    handleSave,
-    handleTestConnection,
-    saveSettings,
-    wcVersion,
     syncType,
     setSyncType,
+    syncProducts,
+    setSyncProducts,
+    syncOrders,
+    setSyncOrders,
+    syncCustomers,
+    setSyncCustomers,
+    message,
+    setMessage,
+    isTesting,
+    isSaving,
+    isValidConnection,
+    wcVersion,
+    handleTestConnection,
+    saveSettings,
   } = useSettings();
 
   return (
@@ -68,7 +78,7 @@ const SettingsPage: React.FC = () => {
                 __next40pxDefaultSize
                 label={__("Base URL", "spire-sync")}
                 value={baseUrl}
-                onChange={(val: string | undefined) => setBaseUrl(val || "")}
+                onChange={(value) => setBaseUrl(value || "")}
                 help={__(
                   "Enter the base URL for the Spire API (e.g., http://example.com/api/v2)",
                   "spire-sync"
@@ -81,9 +91,7 @@ const SettingsPage: React.FC = () => {
                 __next40pxDefaultSize
                 label={__("Company Name", "spire-sync")}
                 value={companyName}
-                onChange={(val: string | undefined) =>
-                  setCompanyName(val || "")
-                }
+                onChange={(value) => setCompanyName(value || "")}
                 style={{ width: "400px" }}
               />
             </PanelRow>
@@ -92,9 +100,7 @@ const SettingsPage: React.FC = () => {
                 __next40pxDefaultSize
                 label={__("API Username", "spire-sync")}
                 value={apiUsername}
-                onChange={(val: string | undefined) =>
-                  setApiUsername(val || "")
-                }
+                onChange={(value) => setApiUsername(value || "")}
                 style={{ width: "400px" }}
               />
             </PanelRow>
@@ -104,25 +110,7 @@ const SettingsPage: React.FC = () => {
                 label={__("API Password", "spire-sync")}
                 type="password"
                 value={apiPassword}
-                onChange={(val: string | undefined) =>
-                  setApiPassword(val || "")
-                }
-                style={{ width: "400px" }}
-              />
-            </PanelRow>
-            <PanelRow>
-              <SelectControl
-                __next40pxDefaultSize
-                __nextHasNoMarginBottom
-                label={__("Sync Type", "spire-sync")}
-                value={syncType}
-                options={[
-                  { label: __("Create Only", "spire-sync"), value: "create" },
-                  { label: __("Update Only", "spire-sync"), value: "update" },
-                  { label: __("Create & Update", "spire-sync"), value: "create-update" },
-                  { label: __("Create, Update, & Delete", "spire-sync"), value: "create-update-delete" },
-                ]}
-                onChange={setSyncType}
+                onChange={(value) => setApiPassword(value || "")}
                 style={{ width: "400px" }}
               />
             </PanelRow>
@@ -138,13 +126,116 @@ const SettingsPage: React.FC = () => {
               </Button>
             </PanelRow>
           </PanelBody>
+          <PanelBody
+            title={__("Sync Settings", "spire-sync")}
+            initialOpen={true}
+          >
+            {/* <PanelRow>
+              <SelectControl
+                __next40pxDefaultSize
+                __nextHasNoMarginBottom
+                label={__("Sync Type", "spire-sync")}
+                value={settings.spire_sync_settings.sync_options?.type}
+                options={[
+                  { label: __("Create Only", "spire-sync"), value: "create" },
+                  { label: __("Update Only", "spire-sync"), value: "update" },
+                  {
+                    label: __("Create & Update", "spire-sync"),
+                    value: "create-update",
+                  },
+                  {
+                    label: __("Create, Update, & Delete", "spire-sync"),
+                    value: "create-update-delete",
+                  },
+                ]}
+                onChange={(value) =>
+                  setSettings({
+                    ...settings,
+                    spire_sync_settings: {
+                      ...settings.spire_sync_settings,
+                      sync_options: {
+                        ...settings.spire_sync_settings.sync_options,
+                        type: value || "update",
+                      },
+                    },
+                  })
+                }
+                style={{ width: "400px" }}
+              />
+            </PanelRow> */}
+            {/* <PanelRow>
+              <p>Sync Products</p>
+              <FormToggle
+                checked={
+                  settings.spire_sync_settings.sync_options?.sync_products
+                }
+                onChange={() =>
+                  setSettings({
+                    ...settings,
+                    spire_sync_settings: {
+                      ...settings.spire_sync_settings,
+                      sync_options: {
+                        ...settings.spire_sync_settings.sync_options,
+                        sync_products:
+                          !settings.spire_sync_settings.sync_options
+                            .sync_products,
+                      },
+                    },
+                  })
+                }
+              />
+            </PanelRow> */}
+          </PanelBody>
         </React.Fragment>
       </Panel>
+      {/* <Card>
+        <CardHeader>
+          <h2>Spire API</h2>
+        </CardHeader>
+        <CardBody>
+          <InputControl
+            __next40pxDefaultSize
+            label={__("Base URL", "spire-sync")}
+            value={settings.spire_sync_settings.spire_api?.base_url}
+            onChange={(value) =>
+              setSettings({
+                ...settings,
+                spire_sync_settings: {
+                  ...settings.spire_sync_settings,
+                  spire_api: {
+                    ...settings.spire_sync_settings.spire_api,
+                    base_url: value || "",
+                  },
+                },
+              })
+            }
+            help={__(
+              "Enter the base URL for the Spire API (e.g., http://example.com/api/v2)",
+              "spire-sync"
+            )}
+          />
+        </CardBody>
+        <CardFooter>
+          <Button
+            variant="primary"
+            onClick={saveSettings}
+            disabled={isSaving}
+          >
+            {isSaving
+              ? __("Saving...", "spire-sync")
+              : __("Save Settings", "spire-sync")}
+          </Button>
+        </CardFooter>
+      </Card> */}
       {/* <div>
         <h1>Status</h1>
         <p>Version: {wcVersion}</p>
       </div> */}
-      <Button variant="primary" onClick={saveSettings} disabled={isSaving}>
+      <Button
+        variant="primary"
+        onClick={saveSettings}
+        disabled={isSaving}
+      >
         {isSaving
           ? __("Saving...", "spire-sync")
           : __("Save Settings", "spire-sync")}
