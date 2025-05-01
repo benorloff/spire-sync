@@ -1,34 +1,18 @@
 import { __ } from "@wordpress/i18n";
 import apiFetch from "@wordpress/api-fetch";
 import { store as noticesStore } from "@wordpress/notices";
-import { useDispatch } from "@wordpress/data";
+import { useSelect, useDispatch } from "@wordpress/data";
 import { useEffect, useState } from "@wordpress/element";
 
 interface SpireSyncSettings {
-  spire_sync_settings: {
-    spire_api?: {
-      base_url?: string;
-      company_name?: string;
-      api_username?: string;
-      api_password?: string;
-    };
-    sync_options?: {
-      type?: "create" | "update" | "create-update" | "create-update-delete";
-      sync_products?: boolean;
-      sync_orders?: boolean;
-      sync_customers?: boolean;
-    };
-  };
-}
-
-interface SpireSyncAdminSettings extends SpireSyncSettings {
-  isTesting?: boolean;
-  isSaving?: boolean;
-  isValidConnection?: boolean;
-  message?: string;
-  wcVersion?: string;
-  syncType?: "create" | "update" | "create-update" | "create-update-delete";
-  syncProducts?: boolean;
+  base_url?: string;
+  company_name?: string;
+  api_username?: string;
+  api_password?: string;
+  sync_type?: "create" | "update" | "create-update" | "create-update-delete";
+  sync_products?: boolean;
+  sync_orders?: boolean;
+  sync_customers?: boolean;
 }
 
 interface SpireSyncTestConnectionResponse {
@@ -37,11 +21,7 @@ interface SpireSyncTestConnectionResponse {
 }
 
 const useSettings = () => {
-  const [settings, setSettings] = useState<SpireSyncAdminSettings>({
-    spire_sync_settings: {
-      spire_api: {},
-      sync_options: {},
-    },
+  const [settings, setSettings] = useState({
     isSaving: false,
     isTesting: false,
     isValidConnection: false,
@@ -68,17 +48,16 @@ const useSettings = () => {
 
   useEffect(() => {
     apiFetch({ path: "/wp/v2/settings" }).then((response) => {
-      const settings = response as SpireSyncSettings;
-      const spireSyncSettings = settings.spire_sync_settings;
-      console.log("spire_sync_settings", spireSyncSettings);
-      setBaseUrl(spireSyncSettings.spire_api?.base_url || "");
-      setCompanyName(spireSyncSettings.spire_api?.company_name || "");
-      setApiUsername(spireSyncSettings.spire_api?.api_username || "");
-      setApiPassword(spireSyncSettings.spire_api?.api_password || "");
-      setSyncType(spireSyncSettings.sync_options?.type || "update");
-      setSyncProducts(spireSyncSettings.sync_options?.sync_products || false);
-      setSyncOrders(spireSyncSettings.sync_options?.sync_orders || false);
-      setSyncCustomers(spireSyncSettings.sync_options?.sync_customers || false);
+      const settings = response as any;
+      console.log("spire_sync_settings", settings.spire_sync_settings);
+      setBaseUrl(settings.spire_sync_settings.base_url || "");
+      setCompanyName(settings.spire_sync_settings.company_name || "");
+      setApiUsername(settings.spire_sync_settings.api_username || "");
+      setApiPassword(settings.spire_sync_settings.api_password || "");
+      setSyncType(settings.spire_sync_settings.sync_type || "update");
+      setSyncProducts(settings.spire_sync_settings.sync_products || false);
+      setSyncOrders(settings.spire_sync_settings.sync_orders || false);
+      setSyncCustomers(settings.spire_sync_settings.sync_customers || false);
     });
     apiFetch({ path: "/wc/v3/system_status" }).then((response) => {
       const system_status = response as any;
@@ -93,7 +72,17 @@ const useSettings = () => {
   //     // const testConnection = await handleTestConnection();
   //   };
 
-  const handleTestConnection = async () => {
+  const handleTestConnection = async ({
+    base_url,
+    company_name,
+    api_username,
+    api_password,
+  }: {
+    base_url: string;
+    company_name: string;
+    api_username: string;
+    api_password: string;
+  }) => {
     setIsTesting(true);
     setMessage("");
 
@@ -106,10 +95,10 @@ const useSettings = () => {
       path: "/spire_sync/v1/test-connection",
       method: "POST",
       data: {
-        base_url: baseUrl,
-        company_name: companyName,
-        api_username: apiUsername,
-        api_password: apiPassword,
+        base_url,
+        company_name,
+        api_username,
+        api_password,
       },
     })
       .then((response) => {
@@ -118,7 +107,9 @@ const useSettings = () => {
         if (!testConnectionResponse.success) {
           setIsTesting(false);
           setIsValidConnection(false);
-          setMessage(__("Invalid credentials. Please try again.", "spire-sync"));
+          setMessage(
+            __("Invalid credentials. Please try again.", "spire-sync")
+          );
           return;
         }
         setIsTesting(false);
@@ -128,7 +119,9 @@ const useSettings = () => {
       .catch((error) => {
         setIsTesting(false);
         setIsValidConnection(false);
-        setMessage(__("An error occurred while testing the connection.", "spire-sync"));
+        setMessage(
+          __("An error occurred while testing the connection.", "spire-sync")
+        );
         console.error(error);
       });
   };
@@ -143,12 +136,10 @@ const useSettings = () => {
       method: "POST",
       data: {
         spire_sync_settings: {
-          spire_api: {
-            base_url: baseUrl,
-            company_name: companyName,
-            api_username: apiUsername,
-            api_password: apiPassword,
-          },
+          base_url: baseUrl,
+          company_name: companyName,
+          api_username: apiUsername,
+          api_password: apiPassword,
         },
       },
     })

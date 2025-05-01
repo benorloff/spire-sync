@@ -45,7 +45,11 @@ class Spire_Sync_Spire_API_Client {
     public function get_instance_info() {
         $total_products = 0;
         $total_customers = 0;
+        $companies = [];
         $inventory_item_udfs = [];
+
+
+
 
     }
 
@@ -60,10 +64,18 @@ class Spire_Sync_Spire_API_Client {
 
     /**
      * Fetches products from Spire for a given company.
+     * 
      *
      * @return array|WP_Error
      */
-    public function get_products() {
-        return $this->request('GET', 'companies/WRIGHT/inventory/items');
+    public function get_products( $query_params = [] ) {
+
+        return $this->request('GET', 'companies/' . $this->company_name . '/inventory/items');
+    }
+
+    public function get_products_count( $query_params = [] ) {
+        $response = $this->request('GET', 'companies/' . $this->company_name . '/inventory/items');
+        $count = isset($response['count']) ? $response['count'] : 0;
+        return $count;
     }
 }

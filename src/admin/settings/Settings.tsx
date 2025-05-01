@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { __ } from "@wordpress/i18n";
 import {
   Panel,
@@ -17,37 +17,95 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
+  __experimentalToggleGroupControl as ToggleGroupControl,
+  __experimentalToggleGroupControlOption as ToggleGroupControlOption,
+  CheckboxControl,
+  Flex,
+  FlexItem,
+  BaseControl,
+  Tooltip,
+  Icon,
 } from "@wordpress/components";
 import { more } from "@wordpress/icons";
+import { useSelect, useDispatch } from "@wordpress/data";
+import { STORE_KEY } from "../../data/store";
 import useSettings from "../../hooks/useSettings";
 
 const SettingsPage: React.FC = () => {
+  const { base_url, company_name, api_username, api_password } = useSelect(
+    (select) => {
+      const store = select(STORE_KEY) as {
+        getBaseUrl: () => string;
+        getCompanyName: () => string;
+        getApiUsername: () => string;
+        getApiPassword: () => string;
+      };
+      return {
+        base_url: store.getBaseUrl(),
+        company_name: store.getCompanyName(),
+        api_username: store.getApiUsername(),
+        api_password: store.getApiPassword(),
+      };
+    },
+    []
+  );
+
   const {
-    baseUrl,
     setBaseUrl,
-    companyName,
     setCompanyName,
-    apiUsername,
     setApiUsername,
-    apiPassword,
     setApiPassword,
-    syncType,
-    setSyncType,
-    syncProducts,
-    setSyncProducts,
-    syncOrders,
-    setSyncOrders,
-    syncCustomers,
-    setSyncCustomers,
+    saveSettings,
+    fetchSettings,
+  } = useDispatch(STORE_KEY);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    console.log("Settings loaded:", { base_url, company_name, api_username });
+  }, [base_url, company_name, api_username]);
+
+  const {
     message,
     setMessage,
     isTesting,
     isSaving,
+    setIsSaving,
     isValidConnection,
     wcVersion,
     handleTestConnection,
-    saveSettings,
   } = useSettings();
+
+  const [checked, setChecked] = useState<boolean>(true);
+
+  const handleSave = async () => {
+    setMessage("");
+    // First test credentials
+    try {
+      const success = await handleTestConnection({
+        base_url,
+        company_name,
+        api_username,
+        api_password,
+      });
+    } catch (error) {
+      console.error("Error testing connection:", error);
+      setMessage(
+        __(
+          "Error testing connection. Please check your credentials.",
+          "spire-sync"
+        )
+      );
+      return;
+    }
+
+    // Only if test passed do we save
+    console.log("Attempting to save settings...");
+    saveSettings({ base_url, company_name, api_username, api_password });
+    setMessage(__('Settings saved successfully.', 'spire-sync'));
+  };
 
   return (
     <div className="spire-sync-settings-container">
@@ -77,7 +135,7 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("Base URL", "spire-sync")}
-                value={baseUrl}
+                value={base_url}
                 onChange={(value) => setBaseUrl(value || "")}
                 help={__(
                   "Enter the base URL for the Spire API (e.g., http://example.com/api/v2)",
@@ -90,7 +148,7 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("Company Name", "spire-sync")}
-                value={companyName}
+                value={company_name}
                 onChange={(value) => setCompanyName(value || "")}
                 style={{ width: "400px" }}
               />
@@ -99,7 +157,7 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("API Username", "spire-sync")}
-                value={apiUsername}
+                value={api_username}
                 onChange={(value) => setApiUsername(value || "")}
                 style={{ width: "400px" }}
               />
@@ -109,7 +167,7 @@ const SettingsPage: React.FC = () => {
                 __next40pxDefaultSize
                 label={__("API Password", "spire-sync")}
                 type="password"
-                value={apiPassword}
+                value={api_password}
                 onChange={(value) => setApiPassword(value || "")}
                 style={{ width: "400px" }}
               />
@@ -126,11 +184,37 @@ const SettingsPage: React.FC = () => {
               </Button>
             </PanelRow>
           </PanelBody>
-          <PanelBody
+        </React.Fragment>
+      </Panel>
+      <Card>
+        <CardHeader>Inventory Settings</CardHeader>
+        <CardBody>
+          <Flex>
+            <FlexItem>
+              Enable Inventory Sync
+              <Tooltip
+                placement="right-end"
+                text="Enable this setting to sync inventory items from Spire to WooCommerce products."
+              >
+                <Icon icon={"info-outline"} style={{ paddingLeft: "10px" }} />
+              </Tooltip>
+            </FlexItem>
+            <FlexItem>
+              <ToggleControl
+                __nextHasNoMarginBottom
+                label=""
+                checked={checked}
+                onChange={() => setChecked((state) => !state)}
+              />
+            </FlexItem>
+          </Flex>
+        </CardBody>
+      </Card>
+      {/* <PanelBody
             title={__("Sync Settings", "spire-sync")}
             initialOpen={true}
-          >
-            {/* <PanelRow>
+          > */}
+      {/* <PanelRow>
               <SelectControl
                 __next40pxDefaultSize
                 __nextHasNoMarginBottom
@@ -163,7 +247,7 @@ const SettingsPage: React.FC = () => {
                 style={{ width: "400px" }}
               />
             </PanelRow> */}
-            {/* <PanelRow>
+      {/* <PanelRow>
               <p>Sync Products</p>
               <FormToggle
                 checked={
@@ -185,9 +269,9 @@ const SettingsPage: React.FC = () => {
                 }
               />
             </PanelRow> */}
-          </PanelBody>
+      {/* </PanelBody>
         </React.Fragment>
-      </Panel>
+      </Panel> */}
       {/* <Card>
         <CardHeader>
           <h2>Spire API</h2>
@@ -231,11 +315,7 @@ const SettingsPage: React.FC = () => {
         <h1>Status</h1>
         <p>Version: {wcVersion}</p>
       </div> */}
-      <Button
-        variant="primary"
-        onClick={saveSettings}
-        disabled={isSaving}
-      >
+      <Button variant="primary" onClick={handleSave} disabled={isSaving}>
         {isSaving
           ? __("Saving...", "spire-sync")
           : __("Save Settings", "spire-sync")}
