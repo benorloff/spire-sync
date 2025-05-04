@@ -1,130 +1,121 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { __ } from "@wordpress/i18n";
 import {
   Panel,
   PanelBody,
   PanelRow,
-  TextControl,
+  __experimentalInputControl as InputControl,
   Button,
   Notice,
-  NavigableMenu,
-  __experimentalInputControl as InputControl,
-  __experimentalInputControlSuffixWrapper as InputControlSuffixWrapper,
-  SelectControl,
-  ToggleControl,
-  FormToggle,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  __experimentalToggleGroupControl as ToggleGroupControl,
-  __experimentalToggleGroupControlOption as ToggleGroupControlOption,
-  CheckboxControl,
-  Flex,
-  FlexItem,
-  BaseControl,
-  Tooltip,
-  Icon,
 } from "@wordpress/components";
-import { more } from "@wordpress/icons";
-import { useSelect, useDispatch } from "@wordpress/data";
-import { STORE_KEY } from "../../data/store";
-import useSettings from "../../hooks/useSettings";
+import apiFetch from "@wordpress/api-fetch";
+
+interface Settings {
+  base_url: string;
+  company_name: string;
+  api_username: string;
+  api_password: string;
+}
+
+interface SettingsResponse {
+  spire_sync_settings: Settings;
+}
+
+interface EncryptionResponse {
+  success: boolean;
+  data: string;
+}
 
 const SettingsPage: React.FC = () => {
-  const { base_url, company_name, api_username, api_password } = useSelect(
-    (select) => {
-      const store = select(STORE_KEY) as {
-        getBaseUrl: () => string;
-        getCompanyName: () => string;
-        getApiUsername: () => string;
-        getApiPassword: () => string;
-      };
-      return {
-        base_url: store.getBaseUrl(),
-        company_name: store.getCompanyName(),
-        api_username: store.getApiUsername(),
-        api_password: store.getApiPassword(),
-      };
-    },
-    []
-  );
-
-  const {
-    setBaseUrl,
-    setCompanyName,
-    setApiUsername,
-    setApiPassword,
-    saveSettings,
-    fetchSettings,
-  } = useDispatch(STORE_KEY);
+  const [settings, setSettings] = useState<Settings>({
+    base_url: "",
+    company_name: "",
+    api_username: "",
+    api_password: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      setIsLoading(true);
+      try {
+        const response = await apiFetch({
+          path: "/wp/v2/settings",
+        }) as SettingsResponse;
+        
+        const spireSyncSettings = response.spire_sync_settings;
+        setSettings(spireSyncSettings);
+      } catch (err) {
+        setError(__("Failed to load settings", "spire-sync"));
+        console.error("Error loading settings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchSettings();
   }, []);
 
-  useEffect(() => {
-    console.log("Settings loaded:", { base_url, company_name, api_username });
-  }, [base_url, company_name, api_username]);
-
-  const {
-    message,
-    setMessage,
-    isTesting,
-    isSaving,
-    setIsSaving,
-    isValidConnection,
-    wcVersion,
-    handleTestConnection,
-  } = useSettings();
-
-  const [checked, setChecked] = useState<boolean>(true);
-
   const handleSave = async () => {
+    setIsSaving(true);
     setMessage("");
-    // First test credentials
-    try {
-      const success = await handleTestConnection({
-        base_url,
-        company_name,
-        api_username,
-        api_password,
-      });
-    } catch (error) {
-      console.error("Error testing connection:", error);
-      setMessage(
-        __(
-          "Error testing connection. Please check your credentials.",
-          "spire-sync"
-        )
-      );
-      return;
-    }
+    setError("");
 
-    // Only if test passed do we save
-    console.log("Attempting to save settings...");
-    saveSettings({ base_url, company_name, api_username, api_password });
-    setMessage(__('Settings saved successfully.', 'spire-sync'));
+    try {
+      // Encrypt the password first
+      const encryptedPassword = await apiFetch({
+        path: "/spire-sync/v1/encrypt",
+        method: "POST",
+        data: { data: settings.api_password }
+      }) as EncryptionResponse;
+
+      // Create a copy of settings with encrypted password
+      const settingsToSave = {
+        ...settings,
+        api_password: encryptedPassword.data
+      };
+
+      const response = await apiFetch({
+        path: "/wp/v2/settings",
+        method: "POST",
+        data: {
+          spire_sync_settings: settingsToSave,
+        },
+      });
+
+      setMessage(__("Settings saved successfully", "spire-sync"));
+      console.log("Settings saved:", response);
+    } catch (err) {
+      setError(__("Failed to save settings", "spire-sync"));
+      console.error("Error saving settings:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (isLoading) {
+    return <div>{__("Loading...", "spire-sync")}</div>;
+  }
 
   return (
     <div className="spire-sync-settings-container">
       <h1>{__("Spire Sync Settings", "spire-sync")}</h1>
+
       {message && (
-        <Notice
-          status="success"
-          isDismissible={true}
-          onDismiss={() => setMessage("")}
-        >
+        <Notice status="success" isDismissible onDismiss={() => setMessage("")}>
           {message}
         </Notice>
       )}
 
-      {/* <NavigableMenu orientation={"vertical"}>
-        <Button variant="tertiary">Item 1</Button>
-        <Button variant="secondary">Item 2</Button>
-        <Button variant="secondary">Item 3</Button>
-      </NavigableMenu> */}
+      {error && (
+        <Notice status="error" isDismissible onDismiss={() => setError("")}>
+          {error}
+        </Notice>
+      )}
+
       <Panel header="Settings">
         <React.Fragment key="0">
           <PanelBody
@@ -135,8 +126,10 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("Base URL", "spire-sync")}
-                value={base_url}
-                onChange={(value) => setBaseUrl(value || "")}
+                value={settings.base_url}
+                onChange={(value) =>
+                  setSettings({ ...settings, base_url: value || "" })
+                }
                 help={__(
                   "Enter the base URL for the Spire API (e.g., http://example.com/api/v2)",
                   "spire-sync"
@@ -148,8 +141,10 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("Company Name", "spire-sync")}
-                value={company_name}
-                onChange={(value) => setCompanyName(value || "")}
+                value={settings.company_name}
+                onChange={(value) =>
+                  setSettings({ ...settings, company_name: value || "" })
+                }
                 style={{ width: "400px" }}
               />
             </PanelRow>
@@ -157,8 +152,10 @@ const SettingsPage: React.FC = () => {
               <InputControl
                 __next40pxDefaultSize
                 label={__("API Username", "spire-sync")}
-                value={api_username}
-                onChange={(value) => setApiUsername(value || "")}
+                value={settings.api_username}
+                onChange={(value) =>
+                  setSettings({ ...settings, api_username: value || "" })
+                }
                 style={{ width: "400px" }}
               />
             </PanelRow>
@@ -167,154 +164,16 @@ const SettingsPage: React.FC = () => {
                 __next40pxDefaultSize
                 label={__("API Password", "spire-sync")}
                 type="password"
-                value={api_password}
-                onChange={(value) => setApiPassword(value || "")}
+                value={settings.api_password}
+                onChange={(value) =>
+                  setSettings({ ...settings, api_password: value || "" })
+                }
                 style={{ width: "400px" }}
               />
-            </PanelRow>
-            <PanelRow>
-              <Button
-                variant="secondary"
-                onClick={handleTestConnection}
-                disabled={isTesting}
-              >
-                {isTesting
-                  ? __("Testing...", "spire-sync")
-                  : __("Test Connection", "spire-sync")}
-              </Button>
             </PanelRow>
           </PanelBody>
         </React.Fragment>
       </Panel>
-      <Card>
-        <CardHeader>Inventory Settings</CardHeader>
-        <CardBody>
-          <Flex>
-            <FlexItem>
-              Enable Inventory Sync
-              <Tooltip
-                placement="right-end"
-                text="Enable this setting to sync inventory items from Spire to WooCommerce products."
-              >
-                <Icon icon={"info-outline"} style={{ paddingLeft: "10px" }} />
-              </Tooltip>
-            </FlexItem>
-            <FlexItem>
-              <ToggleControl
-                __nextHasNoMarginBottom
-                label=""
-                checked={checked}
-                onChange={() => setChecked((state) => !state)}
-              />
-            </FlexItem>
-          </Flex>
-        </CardBody>
-      </Card>
-      {/* <PanelBody
-            title={__("Sync Settings", "spire-sync")}
-            initialOpen={true}
-          > */}
-      {/* <PanelRow>
-              <SelectControl
-                __next40pxDefaultSize
-                __nextHasNoMarginBottom
-                label={__("Sync Type", "spire-sync")}
-                value={settings.spire_sync_settings.sync_options?.type}
-                options={[
-                  { label: __("Create Only", "spire-sync"), value: "create" },
-                  { label: __("Update Only", "spire-sync"), value: "update" },
-                  {
-                    label: __("Create & Update", "spire-sync"),
-                    value: "create-update",
-                  },
-                  {
-                    label: __("Create, Update, & Delete", "spire-sync"),
-                    value: "create-update-delete",
-                  },
-                ]}
-                onChange={(value) =>
-                  setSettings({
-                    ...settings,
-                    spire_sync_settings: {
-                      ...settings.spire_sync_settings,
-                      sync_options: {
-                        ...settings.spire_sync_settings.sync_options,
-                        type: value || "update",
-                      },
-                    },
-                  })
-                }
-                style={{ width: "400px" }}
-              />
-            </PanelRow> */}
-      {/* <PanelRow>
-              <p>Sync Products</p>
-              <FormToggle
-                checked={
-                  settings.spire_sync_settings.sync_options?.sync_products
-                }
-                onChange={() =>
-                  setSettings({
-                    ...settings,
-                    spire_sync_settings: {
-                      ...settings.spire_sync_settings,
-                      sync_options: {
-                        ...settings.spire_sync_settings.sync_options,
-                        sync_products:
-                          !settings.spire_sync_settings.sync_options
-                            .sync_products,
-                      },
-                    },
-                  })
-                }
-              />
-            </PanelRow> */}
-      {/* </PanelBody>
-        </React.Fragment>
-      </Panel> */}
-      {/* <Card>
-        <CardHeader>
-          <h2>Spire API</h2>
-        </CardHeader>
-        <CardBody>
-          <InputControl
-            __next40pxDefaultSize
-            label={__("Base URL", "spire-sync")}
-            value={settings.spire_sync_settings.spire_api?.base_url}
-            onChange={(value) =>
-              setSettings({
-                ...settings,
-                spire_sync_settings: {
-                  ...settings.spire_sync_settings,
-                  spire_api: {
-                    ...settings.spire_sync_settings.spire_api,
-                    base_url: value || "",
-                  },
-                },
-              })
-            }
-            help={__(
-              "Enter the base URL for the Spire API (e.g., http://example.com/api/v2)",
-              "spire-sync"
-            )}
-          />
-        </CardBody>
-        <CardFooter>
-          <Button
-            variant="primary"
-            onClick={saveSettings}
-            disabled={isSaving}
-          >
-            {isSaving
-              ? __("Saving...", "spire-sync")
-              : __("Save Settings", "spire-sync")}
-          </Button>
-        </CardFooter>
-      </Card> */}
-      {/* <div>
-        <h1>Status</h1>
-        <p>Version: {wcVersion}</p>
-      </div> */}
       <Button variant="primary" onClick={handleSave} disabled={isSaving}>
         {isSaving
           ? __("Saving...", "spire-sync")

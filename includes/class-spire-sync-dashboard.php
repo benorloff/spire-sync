@@ -1,5 +1,5 @@
 <?php
-namespace SpireSync\Admin;
+namespace SpireSync;
 
 class Spire_Sync_Dashboard {
 

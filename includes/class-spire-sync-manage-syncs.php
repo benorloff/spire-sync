@@ -1,5 +1,5 @@
 <?php
-namespace SpireSync\Admin;
+namespace SpireSync;
 
 class Spire_Sync_Manage_Syncs {
 
@@ -137,4 +137,4 @@ class Spire_Sync_Manage_Syncs {
 }
  
 // Register WP-Cron hook.
-add_action( 'spire_sync_cron_inventory_sync', [ 'SpireSync\Admin\Spire_Sync_Manage_Syncs', 'process_inventory_sync' ] );
+add_action( 'spire_sync_cron_inventory_sync', [ 'SpireSync\Spire_Sync_Manage_Syncs', 'process_inventory_sync' ] );

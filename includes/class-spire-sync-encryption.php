@@ -1,5 +1,5 @@
 <?php
-namespace SpireSync\Admin;
+namespace SpireSync;
 
 class Spire_Sync_Encryption {
     protected static $cipher = 'AES-256-CBC';

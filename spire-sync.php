@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Spire Sync
  * Description: Sync WooCommerce data with Spire using React and WordPress components.
@@ -6,24 +7,28 @@
  * Author: Ben Orloff
  * Text Domain: spire-sync
  * License: GPLv2 or later
+ * Requires at least: 5.8
+ * Requires PHP: 7.4
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 // Load admin classes.
-require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-dashboard.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-manage-syncs.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-settings.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-logs.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/admin/class-spire-sync-spire-api-client.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/rest-api/class-spire-sync-rest-api.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-dashboard.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-manage-syncs.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-logs.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-spire-api-client.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-rest-api.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-spire-sync-encryption.php';
 
-use SpireSync\Admin\Spire_Sync_Dashboard;
-use SpireSync\Admin\Spire_Sync_Manage_Syncs;
-use SpireSync\Admin\Spire_Sync_Settings;
-use SpireSync\Admin\Spire_Sync_Logs;
-use SpireSync\Admin\Spire_Sync_Spire_API_Client;
-use SpireSync\RestApi\Spire_Sync_Rest_API;
+use SpireSync\Spire_Sync_Dashboard;
+use SpireSync\Spire_Sync_Manage_Syncs;
+use SpireSync\Spire_Sync_Settings;
+use SpireSync\Spire_Sync_Logs;
+use SpireSync\Spire_Sync_Spire_API_Client;
+use SpireSync\Spire_Sync_Rest_API;
+use SpireSync\Spire_Sync_Encryption;
 
 /**
  * Initialize the plugin by instantiating admin classes.
@@ -35,48 +40,46 @@ function spire_sync_init() {
     new Spire_Sync_Logs();
     new Spire_Sync_Spire_API_Client();
     new Spire_Sync_Rest_API();
+    new Spire_Sync_Encryption();
 }
-add_action( 'plugins_loaded', 'spire_sync_init' );
+add_action('plugins_loaded', 'spire_sync_init');
 
+/**
+ * Register plugin settings.
+ */
 function spire_sync_register_settings() {
     $default_settings = [
-        'spire_api' => [
-            'base_url'     => '',
-            'api_username' => '',
-            'api_password' => '',
-            'company_name' => '',
-        ],
+        'base_url'     => '',
+        'api_username' => '',
+        'api_password' => '',
+        'company_name' => '',
     ];
 
     $schema = [
         'type'       => 'object',
         'properties' => [
-            'spire_api' => [
-                'type'       => 'object',
-                'properties' => [
-                    'base_url' => [
-                        'type'        => 'string',
-                        'description' => __( 'Base URL for Spire API', 'spire-sync' ),
-                    ],
-                    'api_username' => [
-                        'type'        => 'string',
-                        'description' => __( 'API Username', 'spire-sync' ),
-                    ],
-                    'api_password' => [
-                        'type'        => 'string',
-                        'description' => __( 'API Password', 'spire-sync' ),
-                    ],
-                    'company_name' => [
-                        'type'        => 'string',
-                        'description' => __( 'Spire Company Name', 'spire-sync' ),
-                    ],
-                ],
+            'base_url' => [
+                'type'        => 'string',
+                'format'      => 'uri',
+                'description' => __('Base URL for Spire API', 'spire-sync'),
+            ],
+            'api_username' => [
+                'type'        => 'string',
+                'description' => __('API Username', 'spire-sync'),
+            ],
+            'api_password' => [
+                'type'        => 'string',
+                'description' => __('API Password', 'spire-sync'),
+            ],
+            'company_name' => [
+                'type'        => 'string',
+                'description' => __('Spire Company Name', 'spire-sync'),
             ],
         ],
     ];
-    
+
     register_setting(
-        'options',
+        'spire_sync_settings',
         'spire_sync_settings',
         [
             'type'         => 'object',
@@ -87,12 +90,39 @@ function spire_sync_register_settings() {
         ]
     );
 }
-add_action( 'init', 'spire_sync_register_settings' );
+add_action('init', 'spire_sync_register_settings');
 
 /**
- * Enqueue admin scripts and styles.
+ * Enqueue global admin styles.
  */
 function spire_sync_enqueue_global_admin_styles() {
-    wp_enqueue_style( 'wp-components' );
+    wp_enqueue_style('wp-components');
 }
-add_action( 'admin_enqueue_scripts', 'spire_sync_enqueue_global_admin_styles' );
+add_action('admin_enqueue_scripts', 'spire_sync_enqueue_global_admin_styles');
+
+/**
+ * Activation hook.
+ */
+function spire_sync_activate() {
+    // Add any activation tasks here
+    flush_rewrite_rules();
+}
+register_activation_hook(__FILE__, 'spire_sync_activate');
+
+/**
+ * Deactivation hook.
+ */
+function spire_sync_deactivate() {
+    // Add any deactivation tasks here
+    flush_rewrite_rules();
+}
+register_deactivation_hook(__FILE__, 'spire_sync_deactivate');
+
+/**
+ * Uninstall hook.
+ */
+function spire_sync_uninstall() {
+    // Add any uninstall tasks here
+    delete_option('spire_sync_settings');
+}
+register_uninstall_hook(__FILE__, 'spire_sync_uninstall');

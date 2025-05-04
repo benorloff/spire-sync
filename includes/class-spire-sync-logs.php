@@ -1,5 +1,5 @@
 <?php
-namespace SpireSync\Admin;
+namespace SpireSync;
 
 use \Automattic\WooCommerce\Utilities\LoggingUtil;
 

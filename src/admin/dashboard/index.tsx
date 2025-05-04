@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from '@wordpress/element';
-import '../../data/store';
 import Dashboard from './Dashboard';
 
 document.addEventListener('DOMContentLoaded', () => {
