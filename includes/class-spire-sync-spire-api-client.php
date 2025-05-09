@@ -61,11 +61,20 @@ class Spire_Sync_Spire_API_Client {
     /**
      * Fetches products from Spire for a given company.
      * 
-     *
+     * @param array $query_params Optional query parameters for filtering and pagination
      * @return array|WP_Error
      */
-    public function get_products( $query_params = [] ) {
-        return $this->request('GET', 'companies/' . $this->company_name . '/inventory/items');
+    public function get_products($query_params = []) {
+        // Build the endpoint with query parameters
+        $endpoint = 'companies/' . $this->company_name . '/inventory/items';
+        
+        // Add query parameters if provided
+        if (!empty($query_params)) {
+            $query_string = http_build_query($query_params);
+            $endpoint .= '?' . $query_string;
+        }
+
+        return $this->request('GET', $endpoint);
     }
 
     public function get_products_count( $query_params = [] ) {

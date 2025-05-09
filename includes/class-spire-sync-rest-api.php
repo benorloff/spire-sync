@@ -89,7 +89,7 @@ class Spire_Sync_Rest_API {
 					'format'      => 'uri',
 				],
 				'company_name' => [
-					'required' => true,
+					'required' => false,
 					'type' => 'string',
 				],
 				'api_username' => [
@@ -117,6 +117,36 @@ class Spire_Sync_Rest_API {
 			'methods' => 'GET',
 			'callback' => [$this, 'get_companies'],
 			'permission_callback' => [$this, 'permissions_check'],
+		]);
+		register_rest_route('spire_sync/v1', '/products', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_products'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object for the Spire API', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+					'description' => __('Starting index for pagination', 'spire-sync'),
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+					'description' => __('Maximum number of items to return', 'spire-sync'),
+				],
+				'udf' => [
+					'required' => false,
+					'type' => 'boolean',
+					'default' => true,
+					'description' => __('Whether to include user defined fields', 'spire-sync'),
+				],
+			],
 		]);
 		// Add more routes here.
 	}
@@ -325,6 +355,61 @@ class Spire_Sync_Rest_API {
 		} catch (\Exception $e) {
 			return new \WP_Error(
 				'companies_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting products.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_products(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			// Prepare query parameters
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+				'udf' => $request->get_param('udf'),
+			];
+
+			// Add filter if provided
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_products($query_params);
+
+			if (is_wp_error($response)) {
+				return new \WP_Error(
+					'products_fetch_failed',
+					$response->get_error_message(),
+					['status' => 500]
+				);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'products_fetch_error',
 				$e->getMessage(),
 				['status' => 500]
 			);
