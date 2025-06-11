@@ -102,7 +102,7 @@ class Spire_Sync_Rest_API {
 				],
 			],
 		]);
-		register_rest_route('spire-sync/v1', '/encrypt', [
+		register_rest_route('spire_sync/v1', '/encrypt', [
 			'methods' => 'POST',
 			'callback' => [$this, 'encrypt_data'],
 			'permission_callback' => [$this, 'permissions_check'],
@@ -148,7 +148,268 @@ class Spire_Sync_Rest_API {
 				],
 			],
 		]);
-		// Add more routes here.
+
+		// Customers routes
+		register_rest_route('spire_sync/v1', '/customers', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_customers'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/customers/(?P<id>[a-zA-Z0-9-]+)', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_customer'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Customer ID', 'spire-sync'),
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/customers/(?P<id>[a-zA-Z0-9-]+)/contacts', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_customer_contacts'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Customer ID', 'spire-sync'),
+				],
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		// Inventory routes
+		register_rest_route('spire_sync/v1', '/inventory/items', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_inventory_items'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/inventory/items/(?P<id>[a-zA-Z0-9-]+)', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_inventory_item'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Inventory item ID', 'spire-sync'),
+				],
+			],
+		]);
+
+		// Payment methods route
+		register_rest_route('spire_sync/v1', '/payment-methods', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_payment_methods'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		// Sales orders routes
+		register_rest_route('spire_sync/v1', '/sales/orders', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_sales_orders'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/sales/orders/(?P<id>[a-zA-Z0-9-]+)', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_sales_order'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Sales order ID', 'spire-sync'),
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/sales/orders', [
+			'methods' => 'POST',
+			'callback' => [$this, 'create_sales_order'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'order_data' => [
+					'required' => true,
+					'type' => 'object',
+					'description' => __('Sales order data', 'spire-sync'),
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/sales/orders/(?P<id>[a-zA-Z0-9-]+)', [
+			'methods' => 'PUT',
+			'callback' => [$this, 'update_sales_order'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Sales order ID', 'spire-sync'),
+				],
+				'order_data' => [
+					'required' => true,
+					'type' => 'object',
+					'description' => __('Updated sales order data', 'spire-sync'),
+				],
+			],
+		]);
+
+		// Shipping methods route
+		register_rest_route('spire_sync/v1', '/shipping-methods', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_shipping_methods'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		// Territories routes
+		register_rest_route('spire_sync/v1', '/territories', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_territories'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'filter' => [
+					'required' => false,
+					'type' => 'string',
+					'description' => __('JSON encoded filter object', 'spire-sync'),
+				],
+				'start' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 0,
+				],
+				'limit' => [
+					'required' => false,
+					'type' => 'integer',
+					'default' => 100,
+				],
+			],
+		]);
+
+		register_rest_route('spire_sync/v1', '/territories/(?P<id>[a-zA-Z0-9-]+)', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_territory'],
+			'permission_callback' => [$this, 'permissions_check'],
+			'args' => [
+				'id' => [
+					'required' => true,
+					'type' => 'string',
+					'description' => __('Territory ID', 'spire-sync'),
+				],
+			],
+		]);
+
+		// Dynamic field value endpoints
+		register_rest_route('spire_sync/v1', '/inventory/warehouses', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_warehouses'],
+			'permission_callback' => [$this, 'permissions_check'],
+		]);
 	}
 
 	/**
@@ -236,12 +497,10 @@ class Spire_Sync_Rest_API {
 	 * @return \WP_REST_Response
 	 */
 	public function test_connection(\WP_REST_Request $request) {
-		// 1. Retrieve credentials from the request.
 		$base_url     = $request->get_param('base_url') ? esc_url_raw($request->get_param('base_url')) : '';
 		$api_username = $request->get_param('api_username') ? sanitize_text_field($request->get_param('api_username')) : '';
 		$api_password = $request->get_param('api_password') ? sanitize_text_field($request->get_param('api_password')) : '';
 
-		// 2. Validate inputs.
 		if (empty($base_url) || empty($api_username) || empty($api_password)) {
 			return rest_ensure_response([
 				'success' => false,
@@ -249,30 +508,21 @@ class Spire_Sync_Rest_API {
 			]);
 		}
 
-		// 3. Instantiate your Spire API client using the provided credentials.
-		//    Here we assume your client class can accept URL, username, and password,
-		//    either via constructor or setter methods.
 		$client = new Spire_Sync_Spire_API_Client([
 			'base_url'  => $base_url,
 			'username'  => $api_username,
 			'password'  => $api_password,
 		]);
 
-		// 4. Perform a simple GET request to verify connectivity.
 		$response = $client->request('GET', '');
 
-		// 5. Check for errors.
 		if (is_wp_error($response)) {
 			return rest_ensure_response([
 				'success' => false,
-				'message' => sprintf(
-					__('Connection test failed: %s', 'spire-sync'),
-					$response->get_error_message()
-				),
+				'error' => $response->get_error_message()
 			]);
 		}
 
-		// 6. Success!
 		return rest_ensure_response([
 			'success' => true,
 			'message' => __('Connection successful.', 'spire-sync'),
@@ -341,16 +591,20 @@ class Spire_Sync_Rest_API {
 			$response = $client->get_companies();
 
 			if (is_wp_error($response)) {
+				return $response;
+			}
+
+			if (!$response['success']) {
 				return new \WP_Error(
 					'companies_fetch_failed',
-					$response->get_error_message(),
+					(string) $response['error'],
 					['status' => 500]
 				);
 			}
 
 			return rest_ensure_response([
 				'success' => true,
-				'data' => $response
+				'data' => $response['data']
 			]);
 		} catch (\Exception $e) {
 			return new \WP_Error(
@@ -396,16 +650,20 @@ class Spire_Sync_Rest_API {
 			$response = $client->get_products($query_params);
 
 			if (is_wp_error($response)) {
+				return $response;
+			}
+
+			if (!$response['success']) {
 				return new \WP_Error(
 					'products_fetch_failed',
-					$response->get_error_message(),
+					(string) $response['error'],
 					['status' => 500]
 				);
 			}
 
 			return rest_ensure_response([
 				'success' => true,
-				'data' => $response
+				'data' => $response['data']
 			]);
 		} catch (\Exception $e) {
 			return new \WP_Error(
@@ -414,5 +672,694 @@ class Spire_Sync_Rest_API {
 				['status' => 500]
 			);
 		}
+	}
+
+	/**
+	 * Callback function for getting customers.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_customers(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_customers($query_params);
+
+			if (!$response['success']) {
+				return new \WP_Error(
+					'customers_fetch_failed',
+					(string) $response['error'],
+					['status' => 500]
+				);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'customers_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting a specific customer.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_customer(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$customer_id = $request->get_param('id');
+			
+			$response = $client->get_customer($customer_id);
+
+			if (!$response['success']) {
+				return new \WP_Error(
+					'customer_fetch_failed',
+					(string) $response['error'],
+					['status' => 500]
+				);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'customer_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting customer contacts.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_customer_contacts(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$customer_id = $request->get_param('id');
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_customer_contacts($customer_id, $query_params);
+
+			if (!$response['success']) {
+				return new \WP_Error(
+					'contacts_fetch_failed',
+					(string) $response['error'],
+					['status' => 500]
+				);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'contacts_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting inventory items.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_inventory_items(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_inventory_items($query_params);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch inventory items', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'inventory_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting a specific inventory item.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_inventory_item(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$item_id = $request->get_param('id');
+			
+			$response = $client->get_inventory_item($item_id);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch inventory item', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'inventory_item_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting payment methods.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_payment_methods(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_payment_methods($query_params);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch payment methods', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'payment_methods_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting sales orders.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_sales_orders(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_sales_orders($query_params);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch sales orders', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'sales_orders_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting a specific sales order.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_sales_order(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$order_id = $request->get_param('id');
+			
+			$response = $client->get_sales_order($order_id);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch sales order', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'sales_order_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for creating a sales order.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function create_sales_order(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$order_data = $request->get_param('order_data');
+			
+			$response = $client->create_sales_order($order_data);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to create sales order', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'sales_order_create_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for updating a sales order.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function update_sales_order(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$order_id = $request->get_param('id');
+			$order_data = $request->get_param('order_data');
+			
+			$response = $client->update_sales_order($order_id, $order_data);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to update sales order', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'sales_order_update_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting shipping methods.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_shipping_methods(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_shipping_methods($query_params);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch shipping methods', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'shipping_methods_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting territories.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_territories(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			
+			$query_params = [
+				'start' => $request->get_param('start'),
+				'limit' => $request->get_param('limit'),
+			];
+
+			$filter = $request->get_param('filter');
+			if (!empty($filter)) {
+				$decoded_filter = json_decode($filter, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$query_params['filter'] = $filter;
+				} else {
+					return new \WP_Error(
+						'invalid_filter',
+						__('Invalid filter JSON format', 'spire-sync'),
+						['status' => 400]
+					);
+				}
+			}
+
+			$response = $client->get_territories($query_params);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch territories', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'territories_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Callback function for getting a specific territory.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_territory(\WP_REST_Request $request) {
+		try {
+			$client = new Spire_Sync_Spire_API_Client();
+			$territory_id = $request->get_param('id');
+			
+			$response = $client->get_territory($territory_id);
+
+			if (is_wp_error($response)) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response->get_error_message()
+				]);
+			}
+
+			if (!$response['success']) {
+				return rest_ensure_response([
+					'success' => false,
+					'error' => $response['error'] ?? __('Failed to fetch territory', 'spire-sync')
+				]);
+			}
+
+			return rest_ensure_response([
+				'success' => true,
+				'data' => $response['data']
+			]);
+		} catch (\Exception $e) {
+			return new \WP_Error(
+				'territory_fetch_error',
+				$e->getMessage(),
+				['status' => 500]
+			);
+		}
+	}
+
+	/**
+	 * Get warehouses from Spire API.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_warehouses() {
+		$client = new Spire_Sync_Spire_API_Client();
+		$response = $client->get_warehouses();
+
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('Spire REST API - Warehouses Response: ' . print_r($response, true));
+		}
+
+		if (is_wp_error($response)) {
+			if (defined('WP_DEBUG') && WP_DEBUG) {
+				error_log('Spire REST API - Warehouses Error: ' . $response->get_error_message());
+			}
+			return new \WP_REST_Response([
+				'success' => false,
+				'error' => $response->get_error_message()
+			]);
+		}
+
+		if (!$response['success']) {
+			if (defined('WP_DEBUG') && WP_DEBUG) {
+				error_log('Spire REST API - Warehouses Error: ' . ($response['error'] ?? 'Unknown error'));
+			}
+			return new \WP_REST_Response([
+				'success' => false,
+				'error' => $response['error'] ?? __('Failed to fetch warehouses', 'spire-sync')
+			]);
+		}
+
+		// Extract warehouse codes and descriptions
+		$warehouses = array_map(function($warehouse) {
+			return [
+				'code' => $warehouse['code'] ?? '',
+				'description' => $warehouse['description'] ?? ''
+			];
+		}, $response['data']);
+
+		// Filter out empty values and sort by code
+		$warehouses = array_filter($warehouses, function($warehouse) {
+			return !empty($warehouse['code']);
+		});
+		usort($warehouses, function($a, $b) {
+			return strcmp($a['code'], $b['code']);
+		});
+
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			error_log('Spire REST API - Processed Warehouses: ' . print_r($warehouses, true));
+		}
+
+		return new \WP_REST_Response([
+			'success' => true,
+			'data' => array_values($warehouses)
+		]);
 	}
 }

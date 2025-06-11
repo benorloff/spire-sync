@@ -28,7 +28,6 @@ use SpireSync\Spire_Sync_Settings;
 use SpireSync\Spire_Sync_Logs;
 use SpireSync\Spire_Sync_Spire_API_Client;
 use SpireSync\Spire_Sync_Rest_API;
-use SpireSync\Spire_Sync_Encryption;
 
 /**
  * Initialize the plugin by instantiating admin classes.
@@ -40,7 +39,6 @@ function spire_sync_init() {
     new Spire_Sync_Logs();
     new Spire_Sync_Spire_API_Client();
     new Spire_Sync_Rest_API();
-    new Spire_Sync_Encryption();
 }
 add_action('plugins_loaded', 'spire_sync_init');
 
